@@ -2,497 +2,251 @@
 
 **AI Coding Workbench powered by AlphaOne HyperRouter**
 
-AlphaOne Harness is a Windows-native AI coding workbench designed for workspace-aware software development with agentic planning, code editing, build/test validation, diagnostics, change review, and controlled execution.
+AlphaOne Harness (AOH) is a Windows AI coding workbench. It combines a full code editor with an AI agent that plans, edits, builds, tests, and reviews work in your project.
 
-AlphaOne Harness uses **AlphaOne HyperRouter** as its AI connectivity layer. Provider credentials and model routing are managed by HyperRouter rather than directly inside AOH.
+AOH uses **AlphaOne HyperRouter** as its only AI backend. Provider credentials and model routing stay in HyperRouter, not in AOH.
 
-> Official public distribution repository for AlphaOne Harness binaries, release notes, and installation documentation.  
+> This is the official public distribution repository for AlphaOne Harness installers, release notes, and installation documentation.
 > The AlphaOne Harness source code is proprietary and is not distributed through this repository.
 
 ---
 
 ## Download
 
-### Latest Release
+**[Download the latest AlphaOne Harness](../../releases/latest)**
 
-Download the latest official Windows installer from:
-
-**[Download AlphaOne Harness](../../releases/latest)**
-
-All published versions are available on the:
-
-**[Releases Page](../../releases)**
-
-Each release includes its own version notes, compatibility information, and downloadable Windows installer.
+All published versions are on the **[Releases page](../../releases)**. Each release has its own notes, the Windows installer, and an `aoh-update.json` file that AOH uses to update itself.
 
 ---
 
-## What is AlphaOne Harness?
+## What Is New in Version 2
 
-AlphaOne Harness combines an IDE-style workbench with an AI development agent.
+AlphaOne Harness 2 is a new workbench built on Code - OSS, the open-source editor behind Visual Studio Code. It replaces AlphaOne Harness 1.
+
+- A full editor with Explorer, Search, Terminal, Problems, Git, debugging, and extensions from Open VSX
+- An AI agent with Implementation Plans, progress tracking, and a final walkthrough
+- Scheduled tasks that run the agent on a timetable
+- Access from your phone through Telegram and Email
+- Automatic updates through GitHub Releases
+
+---
+
+## Architecture
 
 ```text
-Developer
+Developer (PC, or phone through Telegram / Email)
    │
    ▼
 AlphaOne Harness
    │
-   ├── Workspace / Project Intelligence
-   ├── AI Chat & Agent Workflow
-   ├── Code Editing
-   ├── Search / Replace
-   ├── Terminal
-   ├── Build / Test
-   ├── Problems / Diagnostics
-   ├── Git Review
-   ├── AI Diff Review
-   ├── Checkpoints / Undo / Redo
-   └── Approval & Permissions
+   ├── Editor, Explorer, Search, Terminal, Git
+   ├── AI Agent (Agent, Plan, and Ask modes)
+   ├── Implementation Plan, Progress, Walkthrough
+   ├── Build / Test / Fix loop
+   ├── Keep / Undo review and checkpoints
+   ├── Scheduled Tasks
+   └── Connections (Telegram, Email, Tavily web search)
           │
           ▼
-AlphaOne HyperRouter
+AlphaOne HyperRouter  (http://127.0.0.1:11436)
           │
-          ├── Cloud AI Providers
-          ├── Local GGUF AI
-          ├── Provider Routing
-          ├── Auto RollOver
-          └── Token / Quota Diagnostics
+          ├── Cloud AI providers
+          ├── Local GGUF models
+          ├── Provider and model routing
+          └── Embeddings for semantic search
 ```
 
-AOH focuses on the **development workflow**. HyperRouter focuses on **AI provider/model connectivity and routing**.
+AOH focuses on the development workflow. HyperRouter focuses on AI provider and model connectivity.
 
 ---
 
 ## Key Features
 
-### Workspace-Aware Agentic Coding
+### AI Agent
 
-AOH can work from the active workspace or solution without requiring the user to provide exact file paths for normal development tasks.
+Describe a task in chat. The agent searches the workspace, edits files, runs commands, and reports what it did.
 
-Typical workflow:
+- **Agent, Plan, and Ask modes.**
+- **Implementation Plan:** for larger tasks the agent writes a plan that opens in the editor. You can comment on it, ask for a revision, or click **Proceed**.
+- **Progress:** after Proceed, the agent tracks a to-do list based on what it has actually done.
+- **Final Walkthrough:** a summary of the changes and how they were verified.
+- **Build / Test / Fix loop:** the agent builds, reads the errors, fixes them, and runs the tests again.
+- **Run and test projects:** the agent can start a web project, check it in the built-in browser with screenshots, and close it afterwards.
 
-```text
-Understand workspace
-        ↓
-Search relevant files
-        ↓
-Create implementation plan when appropriate
-        ↓
-Review / Proceed
-        ↓
-Edit code
-        ↓
-Build
-        ↓
-Diagnose failures
-        ↓
-Fix and rebuild
-        ↓
-Run tests
-        ↓
-Review resulting changes
-        ↓
-Final walkthrough
-```
+### Review and Undo
 
-### Project & Solution Intelligence
+- Files edited by the agent open in the editor at the change.
+- Each change can be kept or undone with **Keep** and **Undo**.
+- Checkpoints let you return to an earlier point of the chat session.
 
-AOH can discover and reason about common project structures and multi-project workspaces.
+### Project Search
 
-Supported project/build ecosystems include common workflows around:
+- Text and file search across the workspace.
+- **Repo Map:** finds functions, classes, and types by name, without embeddings.
+- **Semantic search** and a project Knowledge Base, using embeddings from HyperRouter.
+- **Explore** subagent for longer searches.
 
-- .NET
-- Node.js / npm / pnpm / yarn / bun
-- Python / pytest / Poetry
-- Rust / Cargo
-- Go
-- Java / Gradle / Maven
-- Flutter / Dart
-- CMake
-- Composer
+### Documents and the Web
 
-Actual build/test capability depends on the tools installed for the active project.
+- **read_document** reads PDF, DOCX, and XLSX files.
+- **Web search** through Tavily when a Tavily API key is set in AOH Connections.
 
-### Integrated Code Workbench
+### Memory and Skills
 
-AOH includes:
+- **Long-term memory:** the agent records project facts and your preferences, and uses them in later sessions.
+- **Skills:** reusable instructions in `SKILL.md` files. After a complex task, the agent can suggest a new skill or an update, with your approval.
 
-- Workspace Explorer
-- Multi-document editor
-- Find in Files
-- Replace in Files
-- File and folder operations
-- Open File / Open Folder / Open Recent
-- Auto Save with stale-write protection
-- External-file editing through explicit user-selected file access
+### Scheduled Tasks
 
-### Developer Console
+Run an agent task on a schedule, such as every day at 07:00.
 
-Bottom-panel tooling includes:
+- Cron-style schedule form, run history, and **Run Now**.
+- Each task runs in its own project, in a minimized window.
+- Runs missed while AOH was closed can run when it starts again.
+- **Ask Before Each Run** and approvals can be sent to Telegram or Email. Results are sent there too.
+- A **Stop** button ends a running task.
 
-- Trajectory
-- Interactive Terminal
-- Output
-- Problems
-- Runtime Logs
+### Phone Access (Telegram and Email)
 
-AOH also provides project-aware Build and Test workflows with truthful raw execution output and structured diagnostics where supported.
+Send a task from your phone while AOH is open on your PC, and get the answer back in the same app.
 
-### AI Diff Review
+- Only allowed senders can use it, added with a pairing code.
+- Risky actions need your approval from the phone with `/approve` or `/deny`.
+- Commands: `/new`, `/status`, `/stop`, `/approve`, `/deny`, `/help`.
+- All settings, including the Tavily key, are entered in the **AOH Connections** form. Secrets are kept in the Windows secret storage.
 
-Agent-produced changes can be reviewed independently from Git.
+### Approvals and Permissions
 
-Capabilities include:
+Tool calls such as editing files, running terminal commands, and sending data follow the approval settings of the workbench. Commands that need approval wait for you, on the PC or on the phone.
 
-- Live Agent change review
-- Per-change Accept
-- Per-change Reject where safely supported
-- Per-file review
-- Added-file review
-- Historical AI Diff Review
-- Protection against stale or externally modified files
+### Extensions
 
-### Agent Checkpoints / Undo / Redo
+Extensions can be installed from **Open VSX** in the Extensions view.
 
-AOH maintains bounded Agent change checkpoints for supported tracked edits.
+### Automatic Updates
 
-This enables guarded workflows such as:
-
-- Undo Agent turn
-- Restore earlier Agent checkpoint
-- Redo eligible undone work
-
-These features are designed to protect current disk/editor state and do not use Git as an unconditional rollback mechanism.
-
-### Implementation Plan & Progress
-
-For larger coding tasks, AOH can present an implementation plan before execution.
-
-The user can:
-
-- Review the plan
-- Add feedback
-- Request revision
-- Authorize implementation
-- Follow structured progress
-- Review the final work result
-
-### Approval & Permissions
-
-Agent actions are governed by configurable approval policy.
-
-Categories include:
-
-- Search files
-- Read files
-- Create files
-- Edit files
-- Delete files
-- Run shell commands
-- Network / Send data
-- External / MCP tools
-
-Available policy styles include:
-
-- Strict
-- Balanced
-- Autonomous
-- Custom
-
-Unknown or unclassified tools fail toward review rather than silently gaining unrestricted authority.
+AOH checks GitHub Releases for a newer version. It downloads the installer, checks its SHA-256 hash, and installs it when you click **Restart to Update**.
 
 ---
 
 ## Powered by AlphaOne HyperRouter
 
-AOH does not ask users to configure OpenAI, Google, Anthropic, DeepSeek, Qwen, or other provider API keys directly inside the AOH workbench.
+You do not enter OpenAI, Google, Anthropic, DeepSeek, Qwen, or other provider API keys in AOH. AOH sends every AI request to HyperRouter.
 
-AI connectivity is routed through:
+- Default endpoint: `http://127.0.0.1:11436`
+- Model name used by AOH: `alphaone-hyperrouter`
 
-```text
-AlphaOne Harness
-      │
-      ▼
-AlphaOne HyperRouter
-      │
-      ├── OpenAI-compatible gateway
-      ├── Responses API compatibility
-      ├── Cloud AI providers
-      ├── Local GGUF AI
-      ├── Auto RollOver
-      └── Provider/model routing
-```
-
-Default HyperRouter endpoint:
-
-```text
-http://127.0.0.1:11436
-```
-
-AOH uses the stable public model identity:
-
-```text
-alphaone-hyperrouter
-```
-
-The physical provider/model selection remains owned by HyperRouter.
+The actual provider and model are chosen by HyperRouter.
 
 ---
 
 ## Installation
 
-### Windows Installer
-
-Download:
-
-```text
-AlphaOne_Harness_Setup_v1.0.0.exe
-```
-
-from the latest GitHub Release.
-
-The installer provides one integrated Windows installation experience.
-
-### Prerequisite behavior
+Download `AlphaOne_Harness_Setup_v<version>.exe` from the latest release and run it. The installer needs administrator rights, because it installs for all users.
 
 ```text
 AOH Setup
    │
-   ├── Microsoft Edge WebView2 Runtime
-   │      ├── already installed → reuse / skip
-   │      └── missing           → run bundled Microsoft bootstrapper
+   ├── AlphaOne Harness 1 found?
+   │      └── yes → uninstalled first
    │
-   ├── AlphaOne HyperRouter
-   │      ├── compatible version installed → preserve
-   │      ├── older version installed      → upgrade
-   │      └── not installed                → install bundled HyperRouter
+   ├── AlphaOne Harness 2
+   │      → installed to C:\Program Files\AlphaOne AI\Harness
    │
-   └── AlphaOne Harness
-          → install application + production runtime
+   └── AlphaOne HyperRouter
+          ├── not installed           → bundled installer runs
+          ├── older version installed → bundled installer upgrades it
+          └── same or newer version   → skipped
 ```
 
-AOH and HyperRouter remain separate installed products with separate versioning and uninstall entries.
+AOH and HyperRouter are separate products, with separate versions and uninstall entries. Uninstalling AOH does not remove HyperRouter or its settings.
 
-AOH uninstall does **not** remove HyperRouter or HyperRouter credentials/configuration.
-
-> The AOH and HyperRouter application payloads are bundled in the AOH installer.  
-> Microsoft runtime prerequisites may still require internet access if they are missing from the system.
+> **Upgrading from version 1:** the uninstaller of version 1 also removes the data of version 1. Version 2 keeps its own data in `%APPDATA%\AlphaOne Harness`.
 
 ---
 
 ## Quick Start
 
-### 1. Install AlphaOne Harness
-
-Download and run the latest:
-
-```text
-AlphaOne_Harness_Setup_v1.0.0.exe
-```
-
-The installer will verify required prerequisites.
-
-### 2. Configure HyperRouter
-
-Open the HyperRouter Settings page:
-
-```text
-http://127.0.0.1:11436/setting
-```
-
-Configure at least one supported cloud provider or enable a compatible Local GGUF model.
-
-### 3. Start AlphaOne Harness
-
-Launch **AlphaOne Harness** from the Desktop or Start Menu.
-
-AOH will start its bundled local production runtime and connect to HyperRouter for AI inference.
-
-### 4. Open a Workspace
-
-Use:
-
-```text
-File > Open Folder...
-```
-
-Then start a new AI session and describe the coding task.
-
-Example:
+1. **Install** AlphaOne Harness with the latest installer.
+2. **Configure HyperRouter** at `http://127.0.0.1:11436/setting`. Add at least one cloud provider or enable a local GGUF model.
+3. **Start AlphaOne Harness** from the Desktop or Start Menu.
+4. **Open a project** with **File > Open Folder...**, then describe a task in chat. For example:
 
 ```text
 Find the cause of the current build failure, fix it, rebuild the project,
-run the relevant tests, and show me the resulting changes.
+run the relevant tests, and show me the changes.
 ```
 
----
-
-## Installation Locations
-
-Default installation:
-
-```text
-C:\Program Files\AlphaOne AI\Harness
-```
-
-Default HyperRouter installation:
-
-```text
-C:\Program Files\AlphaOne AI\HyperRouter
-```
-
-AOH local desktop runtime normally listens on:
-
-```text
-http://127.0.0.1:11435
-```
-
-HyperRouter normally listens on:
-
-```text
-http://127.0.0.1:11436
-```
-
-Both are local-loopback services under the default configuration.
+5. Optional: open **AOH Connections** to add a Tavily key for web search, or to connect Telegram and Email.
 
 ---
 
 ## System Requirements
 
-- Windows x64
-- Microsoft Edge WebView2 Runtime
-- AlphaOne HyperRouter
-- Network access for cloud AI providers
-- Provider API key(s) when using cloud AI
-- Optional compatible `.gguf` model for Local AI
-- Project-specific build/test tools required by the workspace
+- Windows 10 or 11, x64
+- AlphaOne HyperRouter (bundled with the installer)
+- Internet access for cloud AI providers, web search, Telegram, and Email
+- Provider API keys in HyperRouter when you use cloud AI
+- Optional: a compatible `.gguf` model for local AI
+- The build and test tools that your project needs, such as .NET, Node.js, Python, or Java
 
-The installer can provision supported missing prerequisites as described above.
-
-Actual Local AI performance depends on model size, available RAM, GPU VRAM, and hardware acceleration support.
-
----
-
-## Release History
-
-Every public release is published through **GitHub Releases**.
-
-Release pages should contain:
-
-- AOH version
-- Release date
-- Bundled / minimum HyperRouter version
-- Change summary
-- Bug fixes
-- Compatibility changes
-- Installation notes
-- SHA-256 checksum
-- Downloadable Windows installer
-
-See:
-
-**[All Releases](../../releases)**
-
-Older versions may remain available for reference and rollback where appropriate.
+Local AI performance depends on the model size, RAM, GPU VRAM, and hardware acceleration.
 
 ---
 
 ## Security
 
-AlphaOne Harness is designed primarily as a local Windows development workbench.
+- The agent works inside the opened workspace. Edits can be reviewed with Keep and Undo.
+- Terminal commands and other risky tools follow the approval settings.
+- Phone access only accepts allowed senders, and messages older than 10 minutes are not run.
+- API keys, bot tokens, and email passwords are kept in the Windows secret storage, not in settings files.
+- Provider credentials stay in AlphaOne HyperRouter.
 
-AOH includes security boundaries for:
+You remain responsible for:
 
-- Workspace containment
-- Version-checked file mutation
-- Agent approval policy
-- Tool execution approval
-- Sandbox-aware execution
-- Exact-file user grants
-- Stale/conflict protection
-- Local runtime ownership and cleanup
+- Protecting your provider credentials, bot tokens, and email passwords
+- Reviewing agent changes and approval requests
+- Downloading AOH only from official AlphaOne AI channels
+- Reading the release notes before production use
 
-Provider API credentials remain owned by **AlphaOne HyperRouter**.
-
-Users remain responsible for:
-
-- Protecting provider credentials
-- Reviewing Agent changes before acceptance
-- Reviewing approval prompts
-- Protecting local source code and workspaces
-- Downloading AOH only from official AlphaOne AI distribution channels
-- Reviewing release notes before production use
+The installer is not code-signed yet, so Windows SmartScreen may show a warning. Check that the SHA-256 hash in `aoh-update.json` matches the installer you downloaded.
 
 ---
 
 ## Official Website
 
-**AlphaOne AI**
-
-https://alphaone-ai.com
-
-AlphaOne Harness product information:
-
-https://alphaone-ai.com/
-
-AlphaOne HyperRouter:
-
-https://alphaone-ai.com/hyperrouter.html
+- AlphaOne AI: https://alphaone-ai.com
+- AlphaOne HyperRouter: https://alphaone-ai.com/hyperrouter.html
 
 ---
 
 ## Support
 
-For AlphaOne Harness questions, beta testing, compatibility reports, or release-related issues:
+For questions, beta testing, compatibility reports, or release issues: **support@alphaone-ai.com**
 
-**support@alphaone-ai.com**
+When you report an issue, include where possible:
 
-When reporting an issue, include where applicable:
-
-- AlphaOne Harness version
+- AlphaOne Harness version (Help > About)
 - AlphaOne HyperRouter version
 - Windows version
-- Workspace / project type
-- Relevant Build / Test output
-- Relevant AOH runtime log information
-- Relevant HyperRouter status information
+- Project type
+- The relevant build or test output and error messages
 
-Do **not** include API keys, credentials, private source code, or other secrets in public GitHub issues.
+Do **not** include API keys, tokens, passwords, private source code, or other secrets in public GitHub issues.
 
 ---
 
-## Binary Distribution Notice
-
-This repository is intended for:
-
-- Official AlphaOne Harness release announcements
-- Version history
-- Release notes
-- Installation documentation
-- Public Windows binary downloads
-
-It is **not** the AlphaOne Harness source-code repository.
-
-Executable files published under the official **Releases** section are the intended public distribution artifacts.
-
----
-
-## License & Intellectual Property
+## License and Intellectual Property
 
 AlphaOne Harness is proprietary software.
 
 Copyright © 2026 AlphaOne AI. All rights reserved.
 
-The availability of downloadable binaries through this repository does not grant permission to reproduce, redistribute, reverse engineer, modify, sublicense, or commercially exploit AlphaOne-authored proprietary software except where expressly authorized by AlphaOne AI.
+Downloadable installers in this repository do not grant permission to reproduce, redistribute, reverse engineer, modify, sublicense, or commercially exploit AlphaOne software, except where AlphaOne AI expressly authorizes it.
 
-AlphaOne Harness includes third-party and open-source components distributed under their respective licenses. Applicable third-party rights and notices are preserved with the installed product.
+AlphaOne Harness is built on Code - OSS and includes other open-source components under their own licenses, including the MIT License. Their notices are installed with the product.
 
-Third-party product names, trademarks, APIs, and services remain the property of their respective owners.
-
-AlphaOne AI is an independent third-party software provider and is not affiliated with, endorsed by, or sponsored by OpenAI, Anthropic, Google, DeepSeek, Alibaba Cloud, Moonshot AI, Microsoft, or other referenced technology providers.
-
----
-
+Visual Studio Code is a trademark of Microsoft Corporation. Third-party product names, trademarks, APIs, and services belong to their owners. AlphaOne AI is an independent software provider and is not affiliated with, endorsed by, or sponsored by Microsoft, OpenAI, Anthropic, Google, DeepSeek, Alibaba Cloud, Moonshot AI, Telegram, or other referenced technology providers.
 **AlphaOne Harness**  
 *Powered by AlphaOne HyperRouter*
 
